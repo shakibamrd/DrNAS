@@ -39,6 +39,7 @@ parser.add_argument('--weight_decay', type=float, default=3e-4, help='weight dec
 parser.add_argument('--report_freq', type=float, default=50, help='report frequency')
 parser.add_argument('--gpu', type=int, default=0, help='gpu device id')
 parser.add_argument('--epochs', type=int, default=100, help='num of training epochs')
+# TODO: 4.1 Architecture Space init channel number is 36 not 16 ?
 parser.add_argument('--init_channels', type=int, default=16, help='num of init channels')
 parser.add_argument('--cutout', action='store_true', default=False, help='use cutout')
 parser.add_argument('--cutout_length', type=int, default=16, help='cutout length')
@@ -127,7 +128,7 @@ def main():
     logging.info("args = %s", args)
     
     if not 'debug' in args.save:
-        api = API('pth file path')
+        api = API('../NAS-Bench-201-v1_0-e61699.pth')
     criterion = nn.CrossEntropyLoss()
     criterion = criterion.cuda()
 
@@ -140,6 +141,8 @@ def main():
         else:
             model = TinyNetwork(C=args.init_channels, N=5, max_nodes=4, num_classes=n_classes,
                                 criterion=criterion, search_space=NAS_BENCH_201, k=args.k, species='gumbel')
+    # TODO: 4.1 Architecture space states that 20 cells are stacked.
+    # based on TinyNetwork code with N=5 17 cells are stacked
     elif args.method == 'dirichlet':
         model = TinyNetwork(C=args.init_channels, N=5, max_nodes=4, num_classes=n_classes,
                             criterion=criterion, search_space=NAS_BENCH_201, k=args.k, species='dirichlet',
@@ -212,7 +215,7 @@ def main():
 
         if not 'debug' in args.save:
             # nasbench201
-            result = api.query_by_arch(model.genotype())
+            result = api.query_by_arch(model.genotype(), hp='200')
             logging.info('{:}'.format(result))
             cifar10_train, cifar10_test, cifar100_train, cifar100_valid, \
                 cifar100_test, imagenet16_train, imagenet16_valid, imagenet16_test = distill(result)
