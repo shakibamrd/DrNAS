@@ -1,5 +1,8 @@
 .vscode
 __pycache__
-
+vscode_remote_debugging/
 experiments/
 201-space/nas_201_api
+201-space/datapath/
+NAS-Bench-201-v1_0-e61699.pth
+runner.sh
